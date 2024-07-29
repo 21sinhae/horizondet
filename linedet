@@ -1,0 +1,36 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage import io, color, filters, morphology
+from skimage.transform import probabilistic_hough_line
+
+def detect_horizontal_lines(image_path):
+    # Load the image
+    image = io.imread(image_path)
+    
+    # Convert to grayscale
+    grayscale_image = color.rgb2gray(image)
+    
+    # Apply edge detection
+    edges = filters.sobel(grayscale_image)
+    
+    # Perform a morphological operation to close gaps in edges
+    closed_edges = morphology.closing(edges, morphology.rectangle(5, 5))
+    
+    # Perform Hough Line Transform to detect lines
+    lines = probabilistic_hough_line(closed_edges, threshold=10, line_length=5, line_gap=3)
+    
+    # Plot the results
+    fig, ax = plt.subplots()
+    ax.imshow(grayscale_image, cmap=plt.cm.gray)
+    
+    for line in lines:
+        p0, p1 = line
+        ax.plot([p0[1], p1[1]], [p0[0], p1[0]], color='red')
+    
+    plt.title('Detected Horizontal Lines')
+    plt.show()
+
+# Path to the spectrogram image
+image_path = 'path_to_your_spectrogram_image.png'
+
+detect_horizontal_lines(image_path)
